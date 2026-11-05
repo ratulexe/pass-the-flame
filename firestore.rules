@@ -53,8 +53,19 @@ service cloud.firestore {
 
     match /stats/global {
       allow get: if true;
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalDiyas'])
-        && request.resource.data.totalDiyas == resource.data.totalDiyas + 1;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['totalDiyas', 'flamesPassed'])
+        && request.resource.data.totalDiyas == resource.data.totalDiyas + 1
+        && request.resource.data.get('flamesPassed', 0) - resource.data.get('flamesPassed', 0) in [0, 1];
+    }
+
+    // What the public sky shows: no names, no messages and no way back to a greeting's link.
+    match /sky/{id} {
+      allow list: if request.query.limit <= 100;
+      allow create: if request.resource.data.keys().hasOnly(['passed', 'createdAt'])
+        && request.resource.data.keys().hasAll(['passed', 'createdAt'])
+        && request.resource.data.passed is bool
+        && request.resource.data.createdAt == request.time;
     }
 
     match /{document=**} {

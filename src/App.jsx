@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import DiyaGradients from './components/DiyaGradients';
 import FireworksCanvas from './components/FireworksCanvas';
 import Footer from './components/Footer';
@@ -11,6 +11,7 @@ import Toran from './components/Toran';
 
 const CreatePage = lazy(() => import('./pages/CreatePage'));
 const ReceivePage = lazy(() => import('./pages/ReceivePage'));
+const SkyPage = lazy(() => import('./pages/SkyPage'));
 
 export default function App() {
   return (
@@ -22,9 +23,9 @@ export default function App() {
       <FireworksCanvas />
       <div className="relative z-[2] mx-auto flex max-w-[480px] flex-col gap-[22px] px-[18px] pt-[66px] pb-14">
         <header className="dimmable flex items-center justify-between gap-3">
-          <span className="font-display text-[1.1rem] tracking-[0.02em] text-flame">
+          <Link to="/" className="font-display text-[1.1rem] tracking-[0.02em] text-flame">
             Pass the Flame
-          </span>
+          </Link>
           <SoundToggle />
         </header>
         <main>
@@ -32,6 +33,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<CreatePage />} />
               <Route path="/g/:id" element={<ReceivePage />} />
+              <Route path="/sky" element={<SkyPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>

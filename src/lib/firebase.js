@@ -26,6 +26,16 @@ export const loadFirebaseApp = once(async () => {
   return initializeApp(CONFIG);
 });
 
+/** The full SDK adds live listeners, at over four times the size, so only the sky loads it. */
+export const loadLiveFirestore = once(async () => {
+  const [app, firestore] = await Promise.all([loadFirebaseApp(), import('firebase/firestore')]);
+  const db = firestore.getFirestore(app);
+  if (import.meta.env.VITE_USE_FIRESTORE_EMULATOR === 'true') {
+    firestore.connectFirestoreEmulator(db, 'localhost', EMULATOR_PORT);
+  }
+  return { db, ...firestore };
+});
+
 export const loadFirestore = once(async () => {
   const [app, firestore] = await Promise.all([
     loadFirebaseApp(),

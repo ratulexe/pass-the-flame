@@ -31,17 +31,22 @@ export function draftGreeting({ from, to, relation, lang, parent = null }) {
 }
 
 /**
- * Saves the greeting and counts it, together or not at all. The rules treat a taken id as a
- * forbidden update, so a refused write tries once more with a new id.
+ * Saves the greeting, its diya in the sky and the counts, together or not at all. The rules treat
+ * a taken id as a forbidden update, so a refused write tries once more with a new id.
  */
 export async function saveGreeting(draft) {
-  const { db, doc, writeBatch, serverTimestamp, increment } = await loadFirestore();
+  const { db, collection, doc, writeBatch, serverTimestamp, increment } = await loadFirestore();
+  const passed = draft.depth > 0;
   for (let attempt = 1; ; attempt++) {
     const id = randomId();
     const fields = { ...draft, rootId: draft.rootId ?? id };
     const batch = writeBatch(db);
     batch.set(doc(db, 'greetings', id), { ...fields, createdAt: serverTimestamp() });
-    batch.update(doc(db, 'stats', 'global'), { totalDiyas: increment(1) });
+    batch.set(doc(collection(db, 'sky')), { passed, createdAt: serverTimestamp() });
+    batch.update(doc(db, 'stats', 'global'), {
+      totalDiyas: increment(1),
+      ...(passed && { flamesPassed: increment(1) }),
+    });
     try {
       await batch.commit();
       return { ...fields, id };
