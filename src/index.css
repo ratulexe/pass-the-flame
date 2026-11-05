@@ -426,6 +426,27 @@
     background: radial-gradient(circle, rgba(255, 190, 90, 0.6), transparent 65%);
   }
 
+  .btn:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+
+  .wish-flame {
+    position: relative;
+    flex: none;
+    width: 14px;
+    height: 26px;
+  }
+
+  .reveal > .wish-late {
+    animation-delay: 0s;
+  }
+
+  /* Google allows hiding this badge when the footer names reCAPTCHA as plain text */
+  .grecaptcha-badge {
+    visibility: hidden;
+  }
+
   /* Message card reveal, one line at a time */
   .reveal > * {
     animation: rise 0.8s both;

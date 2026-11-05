@@ -8,7 +8,7 @@ import RangoliCanvas from '../components/RangoliCanvas';
 import ReceiveFlow from '../components/ReceiveFlow';
 import SharePanel from '../components/SharePanel';
 import { useCelebration } from '../hooks/useCelebration';
-import { useGreetingSave } from '../hooks/useGreetingSave';
+import { useGreetingCreation } from '../hooks/useGreetingCreation';
 import { sound } from '../lib/audio';
 import { draftGreeting } from '../lib/greetings';
 import { hasProfanity } from '../lib/profanity';
@@ -33,7 +33,6 @@ export default function CreatePage() {
   const [bloomMs, setBloomMs] = useState(INTRO_BLOOM_MS);
   const [bloomKey, setBloomKey] = useState(0);
   const [hint, setHint] = useState({ text: DEFAULT_HINT, error: false });
-  const [greeting, setGreeting] = useState(null);
   const [previewing, setPreviewing] = useState(false);
   const [resetCount, setResetCount] = useState(0);
 
@@ -43,7 +42,8 @@ export default function CreatePage() {
   const fromRef = useRef(null);
   const toRef = useRef(null);
   const { celebrate, frameStage } = useCelebration({ tapForFireworks: !previewing });
-  const save = useGreetingSave();
+  const creation = useGreetingCreation();
+  const greeting = creation.draft;
   const lit = Boolean(greeting);
   const chainRoot = parent ? (parent.chain[0] ?? parent.from) : null;
 
@@ -82,9 +82,7 @@ export default function CreatePage() {
     sound.unlock();
     sound.ambient();
     sound.ignite();
-    const draft = draftGreeting({ from: cleanFrom, to: cleanTo, relation, lang, parent });
-    setGreeting(draft);
-    save.start(draft);
+    creation.start(draftGreeting({ from: cleanFrom, to: cleanTo, relation, lang, parent }));
     setRangoliName(cleanTo);
     setBloomMs(LIT_BLOOM_MS);
     setBloomKey((key) => key + 1);
@@ -97,8 +95,7 @@ export default function CreatePage() {
     setParent(null);
     setTo('');
     setRelation('friend');
-    setGreeting(null);
-    save.reset();
+    creation.reset();
     setHint({ text: DEFAULT_HINT, error: false });
     setRangoliName(DEFAULT_RANGOLI_NAME);
     setBloomMs(INTRO_BLOOM_MS);
@@ -210,13 +207,18 @@ export default function CreatePage() {
             <div className="card">
               <h2 className="card-title">Your flame is ready to travel</h2>
               <SharePanel
-                status={save.status}
-                greeting={save.greeting}
+                status={creation.status}
+                greeting={creation.greeting}
                 recipient={greeting.to}
-                onRetry={save.retry}
+                onRetry={creation.retry}
               />
               <div className="flex flex-wrap gap-2.5">
-                <button type="button" className="btn" onClick={() => setPreviewing(true)}>
+                <button
+                  type="button"
+                  className="btn"
+                  disabled={!greeting.message}
+                  onClick={() => setPreviewing(true)}
+                >
                   See what {firstName(greeting.to)} sees
                 </button>
               </div>

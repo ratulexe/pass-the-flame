@@ -6,6 +6,9 @@ import { cardLines } from '../lib/wishes';
 export default function MessageCard({ greeting }) {
   const { title, relationLine, sign } = cardLines(greeting);
   const [making, setMaking] = useState(false);
+  // A wish that arrives after the card has opened skips the staggered reveal delay.
+  const [wishArrivesLate] = useState(!greeting.message);
+  const ready = Boolean(greeting.message);
 
   const copyMessage = async () => {
     const text = `${title}\n\n${relationLine}\n${greeting.message}\n\n${sign}`;
@@ -32,13 +35,24 @@ export default function MessageCard({ greeting }) {
     <div className="card reveal" lang={greeting.lang}>
       <h2 className="message-title">{title}</h2>
       <p className="font-semibold text-flame">{relationLine}</p>
-      <p className="text-[1.14rem] leading-[1.6]">{greeting.message}</p>
+      {ready ? (
+        <p className={`text-[1.14rem] leading-[1.6] ${wishArrivesLate ? 'wish-late' : ''}`}>
+          {greeting.message}
+        </p>
+      ) : (
+        <p className="flex items-center gap-2.5 text-muted" lang="en" role="status">
+          <span className="wish-flame" aria-hidden="true">
+            <span className="flame-core" />
+          </span>
+          Writing your wish…
+        </p>
+      )}
       <p className="text-muted">{sign}</p>
       <div className="flex flex-wrap gap-2.5" lang="en">
-        <button type="button" className="btn" disabled={making} onClick={shareImage}>
+        <button type="button" className="btn" disabled={making || !ready} onClick={shareImage}>
           {making ? 'Making your card…' : 'Share as image'}
         </button>
-        <button type="button" className="btn" onClick={copyMessage}>
+        <button type="button" className="btn" disabled={!ready} onClick={copyMessage}>
           Copy message
         </button>
       </div>

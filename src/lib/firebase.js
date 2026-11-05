@@ -8,25 +8,32 @@ const CONFIG = {
 };
 const EMULATOR_PORT = 8080;
 
-async function connect() {
-  const [{ initializeApp }, firestore] = await Promise.all([
-    import('firebase/app'),
+/** Runs `connect` once on first use, and again if the last attempt failed. */
+export function once(connect) {
+  let connection = null;
+  return () => {
+    connection ??= connect().catch((error) => {
+      connection = null;
+      throw error;
+    });
+    return connection;
+  };
+}
+
+/** Firebase loads on first use, so the first screen does not wait for it. */
+export const loadFirebaseApp = once(async () => {
+  const { initializeApp } = await import('firebase/app');
+  return initializeApp(CONFIG);
+});
+
+export const loadFirestore = once(async () => {
+  const [app, firestore] = await Promise.all([
+    loadFirebaseApp(),
     import('firebase/firestore/lite'),
   ]);
-  const db = firestore.getFirestore(initializeApp(CONFIG));
+  const db = firestore.getFirestore(app);
   if (import.meta.env.VITE_USE_FIRESTORE_EMULATOR === 'true') {
     firestore.connectFirestoreEmulator(db, 'localhost', EMULATOR_PORT);
   }
   return { db, ...firestore };
-}
-
-let connection = null;
-
-/** Loads Firebase on first use, so the first screen does not wait for it. */
-export function loadFirestore() {
-  connection ??= connect().catch((error) => {
-    connection = null;
-    throw error;
-  });
-  return connection;
-}
+});

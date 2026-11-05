@@ -16,6 +16,11 @@ export const LANGUAGES = [
   { value: 'bn', label: 'বাংলা' },
 ];
 
+export const LANGUAGE_NAMES = { en: 'English', hi: 'Hindi', bn: 'Bengali' };
+
+export const relationLabel = (relation) =>
+  RELATIONS.find(({ value }) => value === relation)?.label ?? 'Friend';
+
 const TEXT = {
   en: {
     title: (name) => `Happy Diwali, ${name}`,

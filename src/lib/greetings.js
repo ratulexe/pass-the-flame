@@ -1,5 +1,4 @@
 import { loadFirestore } from './firebase';
-import { fallbackWish } from './wishes';
 
 const MAX_CHAIN = 8;
 const ID_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';
@@ -16,14 +15,14 @@ function nextChain(parent) {
   return names.length > MAX_CHAIN ? [names[0], ...names.slice(-(MAX_CHAIN - 1))] : names;
 }
 
-/** A complete greeting except for its id, which is chosen when it is saved. */
+/** A greeting still waiting for its wish, and for its id, which is chosen when it is saved. */
 export function draftGreeting({ from, to, relation, lang, parent = null }) {
   return {
     from,
     to,
     relation,
     lang,
-    message: fallbackWish({ from, to, lang }),
+    message: null,
     parentId: parent?.id ?? null,
     rootId: parent?.rootId ?? null,
     chain: parent ? nextChain(parent) : [],

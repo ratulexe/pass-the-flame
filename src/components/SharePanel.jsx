@@ -1,6 +1,7 @@
 import { showToast } from '../lib/toast';
 
 const SAVE_MESSAGES = {
+  writing: 'Your link appears once your wish is written…',
   saving: 'Saving your flame…',
   slow: 'Still saving your flame. This is taking longer than usual…',
   failed: 'Your flame could not be saved. Check your connection and try again.',
