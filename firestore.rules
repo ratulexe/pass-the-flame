@@ -1,0 +1,63 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isName(value) {
+      return value is string && value.size() >= 1 && value.size() <= 24;
+    }
+
+    function hasValidFields(data) {
+      return data.keys().hasOnly(['from', 'to', 'relation', 'lang', 'message', 'parentId', 'rootId',
+                                  'chain', 'depth', 'createdAt'])
+        && data.keys().hasAll(['from', 'to', 'relation', 'lang', 'message', 'parentId', 'rootId',
+                               'chain', 'depth', 'createdAt'])
+        && isName(data.from)
+        && isName(data.to)
+        && data.relation in ['maa', 'papa', 'bestie', 'sibling', 'partner', 'teacher', 'friend']
+        && data.lang in ['en', 'hi', 'bn']
+        && data.message is string && data.message.size() >= 1 && data.message.size() <= 400
+        && data.rootId is string
+        && data.chain is list && data.chain.size() <= 8
+        && data.depth is int
+        && data.createdAt == request.time;
+    }
+
+    function isFirstFlame(id, data) {
+      return data.parentId == null && data.rootId == id && data.chain.size() == 0 && data.depth == 0;
+    }
+
+    // Past 8 names, a chain keeps whoever began it plus the latest 7.
+    function chainFollows(chain, parent) {
+      let names = parent.chain.concat([parent.from]);
+      return names.size() <= 8
+        ? chain == names
+        : chain.size() == 8 && chain[0] == names[0] && chain[7] == parent.from;
+    }
+
+    function isPassedFlame(data) {
+      let parentPath = /databases/$(database)/documents/greetings/$(data.parentId);
+      return data.parentId is string
+        && exists(parentPath)
+        && data.rootId == get(parentPath).data.rootId
+        && data.depth == get(parentPath).data.depth + 1
+        && chainFollows(data.chain, get(parentPath).data);
+    }
+
+    match /greetings/{id} {
+      allow get: if true;
+      allow create: if id.matches('^[a-z0-9]{6,8}$')
+        && hasValidFields(request.resource.data)
+        && (isFirstFlame(id, request.resource.data) || isPassedFlame(request.resource.data));
+    }
+
+    match /stats/global {
+      allow get: if true;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalDiyas'])
+        && request.resource.data.totalDiyas == resource.data.totalDiyas + 1;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -6,21 +6,47 @@ import { getGreeting } from '../lib/greetings';
 export default function ReceivePage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [result, setResult] = useState({ id: null, greeting: null });
+  const [result, setResult] = useState({ id: null, greeting: null, failed: false });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
-    getGreeting(id).then((greeting) => {
-      if (active) setResult({ id, greeting });
-    });
+    getGreeting(id)
+      .then((greeting) => {
+        if (active) setResult({ id, greeting, failed: false });
+      })
+      .catch(() => {
+        if (active) setResult({ id, greeting: null, failed: true });
+      });
     window.scrollTo(0, 0);
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [id, attempt]);
+
+  const retry = () => {
+    setResult({ id: null, greeting: null, failed: false });
+    setAttempt((count) => count + 1);
+  };
 
   if (result.id !== id) {
-    return <p className="text-center text-muted">Looking for your flame…</p>;
+    return (
+      <p className="text-center text-muted" role="status">
+        Looking for your flame…
+      </p>
+    );
+  }
+
+  if (result.failed) {
+    return (
+      <section className="flex flex-col gap-[22px]">
+        <h1>Your flame is having trouble reaching you</h1>
+        <p className="text-[1.05rem] text-muted">Check your connection, then try again.</p>
+        <button type="button" className="btn btn-primary btn-big" onClick={retry}>
+          Try again
+        </button>
+      </section>
+    );
   }
 
   const { greeting } = result;

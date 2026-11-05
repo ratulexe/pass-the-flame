@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import DiyaGradients from './components/DiyaGradients';
 import FireworksCanvas from './components/FireworksCanvas';
@@ -7,8 +8,9 @@ import SoundToggle from './components/SoundToggle';
 import StarrySky from './components/StarrySky';
 import Toast from './components/Toast';
 import Toran from './components/Toran';
-import CreatePage from './pages/CreatePage';
-import ReceivePage from './pages/ReceivePage';
+
+const CreatePage = lazy(() => import('./pages/CreatePage'));
+const ReceivePage = lazy(() => import('./pages/ReceivePage'));
 
 export default function App() {
   return (
@@ -26,11 +28,13 @@ export default function App() {
           <SoundToggle />
         </header>
         <main>
-          <Routes>
-            <Route path="/" element={<CreatePage />} />
-            <Route path="/g/:id" element={<ReceivePage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <Suspense fallback={null}>
+            <Routes>
+              <Route path="/" element={<CreatePage />} />
+              <Route path="/g/:id" element={<ReceivePage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
         </main>
         <Footer />
       </div>

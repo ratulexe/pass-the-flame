@@ -6,9 +6,12 @@ import Matchstick from '../components/Matchstick';
 import MessageCard from '../components/MessageCard';
 import RangoliCanvas from '../components/RangoliCanvas';
 import ReceiveFlow from '../components/ReceiveFlow';
+import SharePanel from '../components/SharePanel';
 import { useCelebration } from '../hooks/useCelebration';
+import { useGreetingSave } from '../hooks/useGreetingSave';
 import { sound } from '../lib/audio';
-import { createGreeting } from '../lib/greetings';
+import { draftGreeting } from '../lib/greetings';
+import { hasProfanity } from '../lib/profanity';
 import { cleanName, firstName, MAX_NAME_LENGTH } from '../lib/sanitize';
 import { LANGUAGES, RELATIONS } from '../lib/wishes';
 
@@ -40,6 +43,7 @@ export default function CreatePage() {
   const fromRef = useRef(null);
   const toRef = useRef(null);
   const { celebrate, frameStage } = useCelebration({ tapForFireworks: !previewing });
+  const save = useGreetingSave();
   const lit = Boolean(greeting);
   const chainRoot = parent ? (parent.chain[0] ?? parent.from) : null;
 
@@ -70,10 +74,17 @@ export default function CreatePage() {
       (cleanFrom ? toRef : fromRef).current.focus();
       return false;
     }
+    if (hasProfanity(cleanFrom) || hasProfanity(cleanTo)) {
+      setHint({ text: "That name can't be used here. Please try another.", error: true });
+      (hasProfanity(cleanFrom) ? fromRef : toRef).current.focus();
+      return false;
+    }
     sound.unlock();
     sound.ambient();
     sound.ignite();
-    setGreeting(createGreeting({ from: cleanFrom, to: cleanTo, relation, lang, parent }));
+    const draft = draftGreeting({ from: cleanFrom, to: cleanTo, relation, lang, parent });
+    setGreeting(draft);
+    save.start(draft);
     setRangoliName(cleanTo);
     setBloomMs(LIT_BLOOM_MS);
     setBloomKey((key) => key + 1);
@@ -87,6 +98,7 @@ export default function CreatePage() {
     setTo('');
     setRelation('friend');
     setGreeting(null);
+    save.reset();
     setHint({ text: DEFAULT_HINT, error: false });
     setRangoliName(DEFAULT_RANGOLI_NAME);
     setBloomMs(INTRO_BLOOM_MS);
@@ -197,16 +209,14 @@ export default function CreatePage() {
             <DiyaRow />
             <div className="card">
               <h2 className="card-title">Your flame is ready to travel</h2>
-              <p>
-                When <b>{greeting.to}</b> opens your link, your flame flies in and lights their
-                diya.
-              </p>
+              <SharePanel
+                status={save.status}
+                greeting={save.greeting}
+                recipient={greeting.to}
+                onRetry={save.retry}
+              />
               <div className="flex flex-wrap gap-2.5">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => setPreviewing(true)}
-                >
+                <button type="button" className="btn" onClick={() => setPreviewing(true)}>
                   See what {firstName(greeting.to)} sees
                 </button>
               </div>
