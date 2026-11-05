@@ -8,7 +8,7 @@
     "dev:phone": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "vite build && firebase deploy --only hosting,firestore",
+    "deploy": "vite build && npx -y firebase-tools deploy --only hosting,firestore",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
