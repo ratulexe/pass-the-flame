@@ -14,7 +14,7 @@ service cloud.firestore {
         && isName(data.from)
         && isName(data.to)
         && data.relation in ['maa', 'papa', 'bestie', 'sibling', 'partner', 'teacher', 'elder',
-                             'friend']
+                             'bhaiya', 'didi', 'friend']
         && data.lang in ['en', 'hi', 'bn']
         && data.message is string && data.message.size() >= 1 && data.message.size() <= 400
         && data.rootId is string

@@ -5,7 +5,9 @@ export const RELATIONS = [
   { value: 'maa', label: 'Maa' },
   { value: 'papa', label: 'Papa' },
   { value: 'bestie', label: 'Best friend' },
-  { value: 'sibling', label: 'Brother or sister' },
+  { value: 'bhaiya', label: 'Elder brother' },
+  { value: 'didi', label: 'Elder sister' },
+  { value: 'sibling', label: 'Younger brother or sister' },
   { value: 'partner', label: 'Partner' },
   { value: 'teacher', label: 'Teacher or mentor' },
   { value: 'elder', label: 'Grandparent or elder relative' },
@@ -13,10 +15,12 @@ export const RELATIONS = [
 ];
 
 // Elders are never shown by name: it is disrespectful to address them that way.
-const ELDER_RELATIONS = new Set(['maa', 'papa', 'teacher', 'elder']);
+const ELDER_RELATIONS = new Set(['maa', 'papa', 'bhaiya', 'didi', 'teacher', 'elder']);
 const ELDER_TITLES = {
   maa: { en: 'Maa', hi: 'माँ', bn: 'মা' },
   papa: { en: 'Papa', hi: 'पापा', bn: 'বাবা' },
+  bhaiya: { en: 'Bhaiya', hi: 'भैया', bn: 'দাদা' },
+  didi: { en: 'Didi', hi: 'दीदी', bn: 'দিদি' },
 };
 
 export const isElder = (relation) => ELDER_RELATIONS.has(relation);
@@ -48,6 +52,8 @@ const TEXT = {
       partner: "To the light I'd choose on every night, not just this one.",
       teacher: 'To the one who taught me that light only grows when you share it.',
       elder: 'To the one whose blessings make every Diwali feel like home.',
+      bhaiya: 'To the brother who always looked out for me, and still lets me win the last sweet.',
+      didi: 'To the sister who always looked out for me, and still saves me the last sweet.',
       friend: 'To someone who makes every festival brighter just by showing up.',
     },
     wishes: [
@@ -71,6 +77,8 @@ const TEXT = {
       partner: 'उस रोशनी के लिए, जिसे मैं हर रात चुनूँ, सिर्फ़ आज नहीं।',
       teacher: 'जिन्होंने सिखाया कि रोशनी बाँटने से बढ़ती है।',
       elder: 'उनके लिए, जिनके आशीर्वाद से हर दीपावली घर जैसी लगती है।',
+      bhaiya: 'उस भैया के लिए, जिन्होंने हमेशा मेरा ख़याल रखा और आख़िरी मिठाई भी मुझे दी।',
+      didi: 'उस दीदी के लिए, जिन्होंने हमेशा मेरा ख़याल रखा और आख़िरी मिठाई भी मुझे दी।',
       friend: 'उस दोस्त के लिए, जिसके आने भर से हर त्योहार रोशन हो जाता है।',
     },
     wishes: [
@@ -94,6 +102,8 @@ const TEXT = {
       partner: 'সেই আলোর জন্য, যাকে আমি প্রতি রাতে বেছে নেব, শুধু আজ নয়।',
       teacher: 'যিনি শিখিয়েছেন, আলো ভাগ করলে তা বাড়ে।',
       elder: 'তাঁর জন্য, যাঁর আশীর্বাদে প্রতিটি দীপাবলি ঘরের মতো লাগে।',
+      bhaiya: 'সেই দাদার জন্য, যে সবসময় আমার খেয়াল রেখেছে আর শেষ মিষ্টিটাও আমাকে দিয়েছে।',
+      didi: 'সেই দিদির জন্য, যে সবসময় আমার খেয়াল রেখেছে আর শেষ মিষ্টিটাও আমাকে দিয়েছে।',
       friend: 'সেই বন্ধুর জন্য, যে এলেই সব উৎসব আলোয় ভরে যায়।',
     },
     wishes: [
