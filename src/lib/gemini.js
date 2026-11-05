@@ -6,6 +6,7 @@ import { elderTitle, fallbackWish, isElder, LANGUAGE_NAMES, relationLabel } from
 // gemini-3.8-flash took over 30s.
 const MODEL = 'gemini-3.5-flash-lite';
 const TIMEOUT_MS = 6000;
+const SECOND_ATTEMPT_MS = 2500;
 const MAX_WISH_LENGTH = 400;
 const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 const SCRIPTS = {
@@ -55,15 +56,6 @@ function describeRecipient(greeting) {
   return `To: the sender's elder (${relation}). ${address} Use respectful language throughout.`;
 }
 
-async function requestWish(greeting) {
-  const model = await loadModel();
-  const { response } = await model.generateContent(
-    `Language: ${LANGUAGE_NAMES[greeting.lang]}\nFrom: ${greeting.from}\n${describeRecipient(greeting)}`,
-  );
-  if (response.candidates?.[0]?.finishReason !== 'STOP') throw new Error('Wish was cut short');
-  return response.text().trim();
-}
-
 function isUsable(wish, lang) {
   return (
     wish.length <= MAX_WISH_LENGTH &&
@@ -73,6 +65,36 @@ function isUsable(wish, lang) {
   );
 }
 
+/**
+ * Some replies take far longer than most, seemingly at random. So if the first request is slow,
+ * or fails, a second one races it and the first usable wish wins.
+ */
+async function requestWish(greeting) {
+  const model = await loadModel();
+  const prompt = `Language: ${LANGUAGE_NAMES[greeting.lang]}\nFrom: ${greeting.from}\n${describeRecipient(greeting)}`;
+  const ask = async () => {
+    const { response } = await model.generateContent(prompt);
+    if (response.candidates?.[0]?.finishReason !== 'STOP') throw new Error('Wish was cut short');
+    const wish = response.text().trim();
+    if (!isUsable(wish, greeting.lang)) throw new Error('Wish was not usable');
+    return wish;
+  };
+
+  const first = ask();
+  const second = new Promise((resolve, reject) => {
+    let askedAgain = false;
+    const askAgain = () => {
+      if (askedAgain) return;
+      askedAgain = true;
+      clearTimeout(timer);
+      ask().then(resolve, reject);
+    };
+    const timer = setTimeout(askAgain, SECOND_ATTEMPT_MS);
+    first.then(() => clearTimeout(timer), askAgain);
+  });
+  return Promise.any([first, second]);
+}
+
 /** Writes a fresh wish, or returns a handwritten one on any failure, so this never rejects. */
 export async function generateWish(greeting) {
   let timer = 0;
@@ -80,8 +102,7 @@ export async function generateWish(greeting) {
     timer = setTimeout(() => reject(new Error('Wish timed out')), TIMEOUT_MS);
   });
   try {
-    const wish = await Promise.race([requestWish(greeting), timeout]);
-    if (isUsable(wish, greeting.lang)) return wish;
+    return await Promise.race([requestWish(greeting), timeout]);
   } catch {
     // The handwritten wish below is the designed outcome for every failure.
   } finally {
