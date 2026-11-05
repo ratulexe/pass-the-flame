@@ -36,19 +36,18 @@ function ShareActions({ greeting }) {
         <input readOnly value={link} dir="ltr" onFocus={(event) => event.target.select()} />
       </label>
       <div className="flex flex-wrap gap-2.5">
-        {canShare ? (
-          <button type="button" className="btn btn-primary" onClick={share}>
-            Share the flame
+        <a
+          className="btn btn-primary text-center"
+          href={`https://wa.me/?text=${encodeURIComponent(`${text}\n${link}`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Send on WhatsApp
+        </a>
+        {canShare && (
+          <button type="button" className="btn" onClick={share}>
+            More ways to share
           </button>
-        ) : (
-          <a
-            className="btn btn-primary"
-            href={`https://wa.me/?text=${encodeURIComponent(`${text} ${link}`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Send on WhatsApp
-          </a>
         )}
         <button type="button" className="btn" onClick={copy}>
           Copy link
