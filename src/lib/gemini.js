@@ -2,7 +2,9 @@ import { loadFirebaseApp, once } from './firebase';
 import { hasProfanity } from './profanity';
 import { fallbackWish, LANGUAGE_NAMES, relationLabel } from './wishes';
 
-const MODEL = 'gemini-3.8-flash';
+// Timed on the live site: usually about 2s, with some replies far slower, which the timeout covers.
+// gemini-3.8-flash took over 30s.
+const MODEL = 'gemini-3.5-flash-lite';
 const TIMEOUT_MS = 6000;
 const MAX_WISH_LENGTH = 400;
 const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
@@ -11,9 +13,12 @@ const SCRIPTS = {
   hi: /\p{Script=Devanagari}/u,
   bn: /\p{Script=Bengali}/u,
 };
+// A doubled vowel sign is a spelling glitch the model sometimes makes in Hindi and Bengali.
+const DOUBLED_MARK = /(\p{M})\1/u;
 
 const SYSTEM_INSTRUCTION = `You write short, warm Diwali wishes for a greeting card.
 Write 2 to 3 sentences, under 300 characters, in the requested language and its own script.
+Spell the festival दीपावली in Hindi and দীপাবলি in Bengali.
 Be personal to the relationship and feel freshly written. Mention lights, sweets, family or togetherness if it suits.
 Do not name any deity, ritual or religious claim beyond Diwali itself. Nothing political.
 Do not add a greeting line, a signature, quotation marks, emoji, hashtags or notes. The card already shows the names.
@@ -35,10 +40,7 @@ const loadModel = once(async () => {
     {
       model: MODEL,
       systemInstruction: SYSTEM_INSTRUCTION,
-      generationConfig: {
-        temperature: 1,
-        thinkingConfig: { thinkingLevel: ai.ThinkingLevel.LOW },
-      },
+      generationConfig: { temperature: 1 },
     },
     { timeout: TIMEOUT_MS },
   );
@@ -54,7 +56,12 @@ async function requestWish({ from, to, relation, lang }) {
 }
 
 function isUsable(wish, lang) {
-  return wish.length <= MAX_WISH_LENGTH && SCRIPTS[lang].test(wish) && !hasProfanity(wish);
+  return (
+    wish.length <= MAX_WISH_LENGTH &&
+    SCRIPTS[lang].test(wish) &&
+    !DOUBLED_MARK.test(wish) &&
+    !hasProfanity(wish)
+  );
 }
 
 /** Writes a fresh wish, or returns a handwritten one on any failure, so this never rejects. */
