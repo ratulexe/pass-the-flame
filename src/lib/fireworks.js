@@ -372,6 +372,12 @@ export const fireworks = {
   spark,
   nameShow,
 
+  /** A quick run of rockets across the sky. */
+  volley(count = 6) {
+    if (prefersReducedMotion()) return;
+    for (let i = 0; i < count; i++) later(randomRocket, i * 280);
+  },
+
   /** Binds the shared overlay canvas. Returns a function that releases it. */
   attach(element) {
     canvas = element;

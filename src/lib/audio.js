@@ -141,6 +141,16 @@ export const sound = {
     bell(987.77, 0.08, 0.45);
   },
 
+  /** Plays one note of the Bhupali scale. */
+  note(index) {
+    bell(BHUPALI[index % BHUPALI.length], 0.14);
+  },
+
+  /** A rising run up the scale. */
+  flourish() {
+    BHUPALI.forEach((frequency, i) => bell(frequency, 0.09, i * 0.12));
+  },
+
   whoosh() {
     noise(1.8, 'bandpass', 200, 1400, 0.12, 0, 0.6);
   },

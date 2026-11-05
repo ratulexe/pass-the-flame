@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import DiyaGradients from './components/DiyaGradients';
 import FireworksCanvas from './components/FireworksCanvas';
 import Footer from './components/Footer';
+import SkyLife from './components/SkyLife';
 import SoundToggle from './components/SoundToggle';
 import StarrySky from './components/StarrySky';
 import Toast from './components/Toast';
@@ -14,6 +15,7 @@ export default function App() {
     <>
       <DiyaGradients />
       <StarrySky />
+      <SkyLife />
       <Toran />
       <FireworksCanvas />
       <div className="relative z-[2] mx-auto flex max-w-[480px] flex-col gap-[22px] px-[18px] pt-[66px] pb-14">

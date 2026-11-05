@@ -231,6 +231,10 @@ function drawRangoli(canvas, model, progress, dim) {
   const ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, size, size);
+  paintRangoli(ctx, model, size, progress, dim);
+}
+
+function paintRangoli(ctx, model, size, progress, dim) {
   const R = size / 2;
   const count = model.layers.length;
   const lw = Math.max(1, size / 320);
@@ -248,6 +252,11 @@ function drawRangoli(canvas, model, progress, dim) {
     drawLayer(ctx, layer, model.symmetry, R, lw);
     ctx.restore();
   });
+}
+
+/** Paints a name's finished rangoli into a `size` square at the context's origin. */
+export function paintFullRangoli(ctx, name, size) {
+  paintRangoli(ctx, buildRangoli(name), size, 1, false);
 }
 
 /** Blooms a name's rangoli over `duration` ms. Returns a function that cancels the bloom. */

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Diya from '../components/Diya';
+import DiyaRow from '../components/DiyaRow';
 import Matchstick from '../components/Matchstick';
 import MessageCard from '../components/MessageCard';
 import RangoliCanvas from '../components/RangoliCanvas';
@@ -193,6 +194,7 @@ export default function CreatePage() {
         {lit && (
           <div ref={resultRef} className="dimmable flex flex-col gap-[22px]">
             <MessageCard greeting={greeting} />
+            <DiyaRow />
             <div className="card">
               <h2 className="card-title">Your flame is ready to travel</h2>
               <p>

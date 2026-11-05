@@ -4,6 +4,7 @@ import { prefersReducedMotion } from '../lib/motion';
 import { useCelebration } from '../hooks/useCelebration';
 import ChainGarland from './ChainGarland';
 import Diya from './Diya';
+import DiyaRow from './DiyaRow';
 import FlameFlight from './FlameFlight';
 import MessageCard from './MessageCard';
 import RangoliCanvas from './RangoliCanvas';
@@ -94,6 +95,7 @@ export default function ReceiveFlow({ greeting, onBack, onPass, onStartOwn }) {
       {lit && (
         <div ref={resultRef} className="dimmable flex flex-col gap-[22px]">
           <MessageCard greeting={greeting} />
+          <DiyaRow />
           {onPass && (
             <div className="card">
               <h2 className="card-title">Keep the flame moving</h2>
