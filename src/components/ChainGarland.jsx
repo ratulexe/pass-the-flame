@@ -1,3 +1,5 @@
+import { isElder } from '../lib/wishes';
+
 const MAX_VISIBLE = 6;
 
 /** Long chains show the first person, a "+N more" link and the last four. */
@@ -17,6 +19,10 @@ function visiblePeople({ chain, from, to, depth }) {
 export default function ChainGarland({ greeting, lit, preview }) {
   const homes = greeting.depth + 1;
   const people = visiblePeople(greeting);
+  const recipientLabel = (name) => {
+    if (isElder(greeting.relation)) return 'You';
+    return preview ? name : `${name} (you)`;
+  };
 
   return (
     <div className="card">
@@ -35,7 +41,7 @@ export default function ChainGarland({ greeting, lit, preview }) {
             )}
             <span className={`chain-person ${person.isRecipient ? 'text-flame' : ''}`}>
               <span className={`mini-diya ${!person.isRecipient || lit ? 'mini-diya-lit' : ''}`} />
-              {person.isRecipient && !preview ? `${person.name} (you)` : person.name}
+              {person.isRecipient ? recipientLabel(person.name) : person.name}
             </span>
           </li>
         ))}

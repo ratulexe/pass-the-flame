@@ -1,4 +1,5 @@
 import { hashString } from './random';
+import { firstName } from './sanitize';
 
 export const RELATIONS = [
   { value: 'maa', label: 'Maa' },
@@ -7,8 +8,21 @@ export const RELATIONS = [
   { value: 'sibling', label: 'Brother or sister' },
   { value: 'partner', label: 'Partner' },
   { value: 'teacher', label: 'Teacher or mentor' },
+  { value: 'elder', label: 'Grandparent or elder relative' },
   { value: 'friend', label: 'Friend' },
 ];
+
+// Elders are never shown by name: it is disrespectful to address them that way.
+const ELDER_RELATIONS = new Set(['maa', 'papa', 'teacher', 'elder']);
+const ELDER_TITLES = {
+  maa: { en: 'Maa', hi: 'माँ', bn: 'মা' },
+  papa: { en: 'Papa', hi: 'पापा', bn: 'বাবা' },
+};
+
+export const isElder = (relation) => ELDER_RELATIONS.has(relation);
+
+/** What an elder is called instead of their name, if the relation gives a title. */
+export const elderTitle = ({ relation, lang }) => ELDER_TITLES[relation]?.[lang] ?? null;
 
 export const LANGUAGES = [
   { value: 'en', label: 'English' },
@@ -23,6 +37,7 @@ export const relationLabel = (relation) =>
 
 const TEXT = {
   en: {
+    festival: 'Happy Diwali',
     title: (name) => `Happy Diwali, ${name}`,
     sign: (name) => `With love and light, ${name}`,
     relation: {
@@ -32,6 +47,7 @@ const TEXT = {
       sibling: 'To my forever rival for the last laddoo.',
       partner: "To the light I'd choose on every night, not just this one.",
       teacher: 'To the one who taught me that light only grows when you share it.',
+      elder: 'To the one whose blessings make every Diwali feel like home.',
       friend: 'To someone who makes every festival brighter just by showing up.',
     },
     wishes: [
@@ -44,6 +60,7 @@ const TEXT = {
     ],
   },
   hi: {
+    festival: 'शुभ दीपावली',
     title: (name) => `शुभ दीपावली, ${name}`,
     sign: (name) => `ढेर सारे प्यार के साथ, ${name}`,
     relation: {
@@ -53,6 +70,7 @@ const TEXT = {
       sibling: 'आख़िरी लड्डू के लिए मेरे हमेशा के प्रतिद्वंद्वी के लिए।',
       partner: 'उस रोशनी के लिए, जिसे मैं हर रात चुनूँ, सिर्फ़ आज नहीं।',
       teacher: 'जिन्होंने सिखाया कि रोशनी बाँटने से बढ़ती है।',
+      elder: 'उनके लिए, जिनके आशीर्वाद से हर दीपावली घर जैसी लगती है।',
       friend: 'उस दोस्त के लिए, जिसके आने भर से हर त्योहार रोशन हो जाता है।',
     },
     wishes: [
@@ -65,6 +83,7 @@ const TEXT = {
     ],
   },
   bn: {
+    festival: 'শুভ দীপাবলি',
     title: (name) => `শুভ দীপাবলি, ${name}`,
     sign: (name) => `অনেক ভালোবাসা সহ, ${name}`,
     relation: {
@@ -74,6 +93,7 @@ const TEXT = {
       sibling: 'শেষ লাড্ডুর জন্য আমার চিরকালের প্রতিদ্বন্দ্বীর জন্য।',
       partner: 'সেই আলোর জন্য, যাকে আমি প্রতি রাতে বেছে নেব, শুধু আজ নয়।',
       teacher: 'যিনি শিখিয়েছেন, আলো ভাগ করলে তা বাড়ে।',
+      elder: 'তাঁর জন্য, যাঁর আশীর্বাদে প্রতিটি দীপাবলি ঘরের মতো লাগে।',
       friend: 'সেই বন্ধুর জন্য, যে এলেই সব উৎসব আলোয় ভরে যায়।',
     },
     wishes: [
@@ -88,16 +108,32 @@ const TEXT = {
 };
 
 /** Handwritten wish, stable for a given sender and recipient. */
-export function fallbackWish({ from, to, lang }) {
+export function fallbackWish({ from, to, relation, lang }) {
   const { wishes } = TEXT[lang] ?? TEXT.en;
-  return wishes[hashString(`${from}|${to}`) % wishes.length];
+  const wish = wishes[hashString(`${from}|${to}`) % wishes.length];
+  // Bengali wishes use the familiar "your", which suits Maa and Papa but not other elders.
+  const formal = isElder(relation) && !elderTitle({ relation, lang });
+  return formal && lang === 'bn' ? wish.replaceAll('তোমার', 'আপনার') : wish;
+}
+
+/** How the greeting addresses its recipient: an elder's title, or else nothing, or their name. */
+function addressFor({ to, relation, lang }) {
+  return isElder(relation) ? elderTitle({ relation, lang }) : to;
+}
+
+/** The words the fireworks spell in the sky. */
+export function skyText(greeting) {
+  const address = addressFor(greeting);
+  if (!address) return (TEXT[greeting.lang] ?? TEXT.en).festival;
+  return isElder(greeting.relation) ? address : firstName(address);
 }
 
 /** The fixed lines around the wish on a message card. */
 export function cardLines({ from, to, relation, lang }) {
   const text = TEXT[lang] ?? TEXT.en;
+  const address = addressFor({ to, relation, lang });
   return {
-    title: text.title(to),
+    title: address ? text.title(address) : text.festival,
     relationLine: text.relation[relation] ?? text.relation.friend,
     sign: text.sign(from),
   };

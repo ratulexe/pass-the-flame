@@ -1,8 +1,8 @@
 import { DataSet, englishDataset, englishRecommendedTransformers, RegExpMatcher } from 'obscenity';
 
-// These match inside common Indian names (Harshit, Dikshit, Shital, Anal), so the English matcher
-// skips them. "shit" is blocked below as a whole word instead.
-const NAME_FRIENDLY_PHRASES = new Set(['shit', 'anal']);
+// These match inside common Indian names (Harshit, Shital, Anal, Anusha, Dhanush, Cumar), so the
+// English matcher skips them, and the list below blocks them as whole words instead.
+const NAME_FRIENDLY_PHRASES = new Set(['shit', 'anal', 'anus', 'cum']);
 
 const englishMatcher = new RegExpMatcher({
   ...new DataSet()
@@ -17,6 +17,9 @@ const BLOCKED_WORDS = new Set([
   'shit',
   'shitty',
   'bullshit',
+  'anus',
+  'cum',
+  'cumshot',
   'chutiya',
   'chutiye',
   'madarchod',

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fireworks } from '../lib/fireworks';
 import { prefersReducedMotion, scrollBehavior } from '../lib/motion';
-import { firstName } from '../lib/sanitize';
 import { showToast } from '../lib/toast';
 
 const SHOWTIME_CLASS = 'showtime';
@@ -37,14 +36,14 @@ export function useCelebration({ tapForFireworks = true } = {}) {
     return () => window.removeEventListener('pointerdown', onPointerDown);
   }, [celebrated, tapForFireworks]);
 
-  const celebrate = useCallback((name, resultRef) => {
+  const celebrate = useCallback((skyText, resultRef) => {
     const reduce = prefersReducedMotion();
     const after = (ms, callback) => timers.current.push(setTimeout(callback, ms));
 
     setCelebrated(true);
     document.body.classList.add(SHOWTIME_CLASS);
     after(reduce ? 2500 : 4200, () => document.body.classList.remove(SHOWTIME_CLASS));
-    fireworks.nameShow(firstName(name));
+    fireworks.nameShow(skyText);
     after(reduce ? 200 : 4300, () =>
       resultRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' }),
     );

@@ -1,6 +1,6 @@
 import { loadFirebaseApp, once } from './firebase';
 import { hasProfanity } from './profanity';
-import { fallbackWish, LANGUAGE_NAMES, relationLabel } from './wishes';
+import { elderTitle, fallbackWish, isElder, LANGUAGE_NAMES, relationLabel } from './wishes';
 
 // Timed on the live site: usually about 2s, with some replies far slower, which the timeout covers.
 // gemini-3.8-flash took over 30s.
@@ -46,10 +46,19 @@ const loadModel = once(async () => {
   );
 });
 
-async function requestWish({ from, to, relation, lang }) {
+// An elder's name is never sent, so the model cannot address them by it.
+function describeRecipient(greeting) {
+  const relation = relationLabel(greeting.relation);
+  if (!isElder(greeting.relation)) return `To: ${greeting.to}\nThey are the sender's: ${relation}`;
+  const title = elderTitle(greeting);
+  const address = title ? `Address them only as ${title}.` : 'Do not use any name for them.';
+  return `To: the sender's elder (${relation}). ${address} Use respectful language throughout.`;
+}
+
+async function requestWish(greeting) {
   const model = await loadModel();
   const { response } = await model.generateContent(
-    `Language: ${LANGUAGE_NAMES[lang]}\nFrom: ${from}\nTo: ${to}\n${to} is the sender's: ${relationLabel(relation)}`,
+    `Language: ${LANGUAGE_NAMES[greeting.lang]}\nFrom: ${greeting.from}\n${describeRecipient(greeting)}`,
   );
   if (response.candidates?.[0]?.finishReason !== 'STOP') throw new Error('Wish was cut short');
   return response.text().trim();

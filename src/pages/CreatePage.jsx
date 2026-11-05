@@ -13,7 +13,7 @@ import { sound } from '../lib/audio';
 import { draftGreeting } from '../lib/greetings';
 import { hasProfanity } from '../lib/profanity';
 import { cleanName, firstName, MAX_NAME_LENGTH } from '../lib/sanitize';
-import { LANGUAGES, RELATIONS } from '../lib/wishes';
+import { LANGUAGES, RELATIONS, skyText } from '../lib/wishes';
 
 const DEFAULT_RANGOLI_NAME = 'Diwali';
 const PREVIEW_DEBOUNCE_MS = 200;
@@ -82,12 +82,13 @@ export default function CreatePage() {
     sound.unlock();
     sound.ambient();
     sound.ignite();
-    creation.start(draftGreeting({ from: cleanFrom, to: cleanTo, relation, lang, parent }));
+    const draft = draftGreeting({ from: cleanFrom, to: cleanTo, relation, lang, parent });
+    creation.start(draft);
     setRangoliName(cleanTo);
     setBloomMs(LIT_BLOOM_MS);
     setBloomKey((key) => key + 1);
     frameStage(stageRef.current);
-    celebrate(cleanTo, resultRef);
+    celebrate(skyText(draft), resultRef);
     return true;
   };
 

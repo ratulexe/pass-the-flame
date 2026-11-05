@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { sound } from '../lib/audio';
 import { prefersReducedMotion } from '../lib/motion';
 import { useCelebration } from '../hooks/useCelebration';
+import { elderTitle, isElder, skyText } from '../lib/wishes';
 import ChainGarland from './ChainGarland';
 import Diya from './Diya';
 import DiyaRow from './DiyaRow';
@@ -11,6 +12,11 @@ import RangoliCanvas from './RangoliCanvas';
 
 const FLIGHT_DELAY_MS = 700;
 const BLOOM_MS = 2600;
+
+function arrivalLine(greeting) {
+  const address = isElder(greeting.relation) ? elderTitle(greeting) : greeting.to;
+  return address ? `A flame is on its way to you, ${address}` : 'A flame is on its way to you';
+}
 
 /**
  * What a recipient experiences, from "Receive the flame" to the wish. The sender's preview uses
@@ -28,8 +34,8 @@ export default function ReceiveFlow({ greeting, onBack, onPass, onStartOwn }) {
   const arrive = useCallback(() => {
     sound.ignite();
     setStage('lit');
-    celebrate(greeting.to, resultRef);
-  }, [celebrate, greeting.to]);
+    celebrate(skyText(greeting), resultRef);
+  }, [celebrate, greeting]);
 
   useEffect(() => {
     if (stage !== 'launching') return undefined;
@@ -67,7 +73,7 @@ export default function ReceiveFlow({ greeting, onBack, onPass, onStartOwn }) {
 
       <div className="dimmable flex flex-col gap-2">
         <p className="font-semibold text-flame">{greeting.from} lit a diya for you</p>
-        <h1>A flame is on its way to you, {greeting.to}</h1>
+        <h1>{arrivalLine(greeting)}</h1>
       </div>
 
       <div className="dimmable">
