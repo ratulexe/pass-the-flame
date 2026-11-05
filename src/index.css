@@ -1,0 +1,545 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-night: #0c0717;
+  --color-ink: #f8ecd8;
+  --color-muted: #c3b2cf;
+  --color-flame: #ffb238;
+  --color-marigold: #ff8a1f;
+  --color-glow: #ffe6ae;
+  --color-card: rgba(30, 16, 44, 0.76);
+  --color-line: rgba(255, 196, 120, 0.22);
+  --font-display: 'Yatra One', 'Tiro Bangla', Georgia, serif;
+  --font-body: 'Mukta', 'Hind Siliguri', system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+    background: var(--color-night);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+    /* The matchstick's enlarged touch area reaches past the screen edge */
+    overflow-x: clip;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-flame);
+    outline-offset: 2px;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 7.4vw, 2.6rem);
+    line-height: 1.15;
+    color: var(--color-glow);
+    text-shadow: 0 0 28px rgba(255, 160, 50, 0.35);
+    text-wrap: balance;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 12px;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--color-ink);
+    background-color: rgba(8, 4, 16, 0.6);
+    border: 1px solid rgba(255, 196, 120, 0.3);
+    border-radius: 10px;
+  }
+
+  select {
+    appearance: none;
+    padding-right: 30px;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--color-flame) 50%),
+      linear-gradient(135deg, var(--color-flame) 50%, transparent 50%);
+    background-position:
+      calc(100% - 18px) 55%,
+      calc(100% - 13px) 55%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+  }
+
+  select option {
+    background: #1d1029;
+    color: var(--color-ink);
+  }
+
+  input:disabled,
+  select:disabled {
+    opacity: 0.55;
+  }
+}
+
+@layer components {
+  /* Controls and surfaces */
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 18px;
+    backdrop-filter: blur(8px);
+  }
+
+  .card-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    line-height: 1.25;
+    color: var(--color-glow);
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .btn {
+    min-height: 48px;
+    padding: 11px 18px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    cursor: pointer;
+    background: rgba(255, 178, 56, 0.1);
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+  }
+
+  .btn-primary {
+    color: #2a1206;
+    background: linear-gradient(180deg, #ffc960, var(--color-marigold));
+    border: 0;
+    box-shadow: 0 6px 24px rgba(255, 138, 31, 0.35);
+  }
+
+  .btn-big {
+    align-self: center;
+    min-width: 250px;
+    padding: 15px 26px;
+    font-size: 1.12rem;
+  }
+
+  .link-btn {
+    align-self: flex-start;
+    padding: 6px 4px;
+    color: var(--color-flame);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    cursor: pointer;
+    background: rgba(255, 178, 56, 0.12);
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    z-index: 8;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    pointer-events: none;
+    background: rgba(20, 10, 30, 0.9);
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    opacity: 0;
+    transform: translateX(-50%);
+    transition: opacity 0.4s;
+  }
+
+  .toast-visible {
+    opacity: 1;
+  }
+
+  /* Page furniture fades back while the fireworks play */
+  .dimmable {
+    transition: opacity 0.8s ease;
+  }
+
+  .showtime .dimmable {
+    opacity: 0.1;
+  }
+
+  /* Stage: rangoli + diya */
+  .stage {
+    position: relative;
+    width: min(100%, 340px);
+    aspect-ratio: 1;
+    margin: 0 auto;
+    user-select: none;
+  }
+
+  .stage::before {
+    content: '';
+    position: absolute;
+    inset: 4%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 170, 70, 0.32),
+      rgba(255, 120, 40, 0.08) 45%,
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 1.4s;
+  }
+
+  .stage.lit::before {
+    opacity: 1;
+  }
+
+  .rangoli {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .diya {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40%;
+    transform: translate(-50%, -38%);
+  }
+
+  .diya svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.55));
+  }
+
+  .anchor {
+    position: absolute;
+    top: 31%;
+    left: 50%;
+    width: 0;
+    height: 0;
+  }
+
+  .flame {
+    position: absolute;
+    bottom: -2px;
+    left: -12px;
+    width: 24px;
+    height: 44px;
+    transform: scale(0);
+    transform-origin: 50% 100%;
+    opacity: 0;
+    transition:
+      transform 0.6s cubic-bezier(0.2, 1.5, 0.4, 1),
+      opacity 0.3s;
+  }
+
+  .lit .flame {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .flame-core {
+    position: absolute;
+    inset: 0;
+    border-radius: 50% 50% 50% 50% / 64% 64% 36% 36%;
+    background: radial-gradient(
+      ellipse 50% 58% at 50% 74%,
+      #fffdf0 0 16%,
+      #ffe48e 30%,
+      #ffb02e 52%,
+      rgba(255, 84, 20, 0.9) 70%,
+      rgba(255, 60, 0, 0) 80%
+    );
+    transform-origin: 50% 100%;
+    animation: flicker 1.7s ease-in-out infinite;
+  }
+
+  .flame-blue {
+    position: absolute;
+    right: 32%;
+    bottom: 3px;
+    left: 32%;
+    height: 20%;
+    border-radius: 50%;
+    background: radial-gradient(rgba(110, 160, 255, 0.9), rgba(80, 120, 255, 0) 70%);
+    opacity: 0.75;
+  }
+
+  .halo {
+    position: absolute;
+    top: -125px;
+    left: -95px;
+    width: 190px;
+    height: 190px;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 200, 110, 0.55),
+      rgba(255, 140, 40, 0.14) 45%,
+      rgba(255, 120, 30, 0) 70%
+    );
+    opacity: 0;
+    transition: opacity 1.2s;
+  }
+
+  .lit .halo {
+    opacity: 1;
+    animation: breathe 3.2s ease-in-out infinite;
+  }
+
+  .wick-target {
+    position: absolute;
+    top: -24px;
+    left: -17px;
+    width: 34px;
+    height: 34px;
+    border: 2px dashed rgba(255, 214, 150, 0.8);
+    border-radius: 50%;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  .lit .wick-target {
+    display: none;
+  }
+
+  /* Only the matchstick blocks touch scrolling, so the page still scrolls over the stage */
+  .match {
+    position: absolute;
+    right: 4%;
+    bottom: 3%;
+    z-index: 4;
+    width: 16px;
+    height: 100px;
+    cursor: grab;
+    touch-action: none;
+    transform: rotate(-28deg);
+    transition: opacity 0.4s;
+  }
+
+  .match::before {
+    content: '';
+    position: absolute;
+    inset: -22px;
+  }
+
+  .match-dragging {
+    cursor: grabbing;
+    transition: none;
+  }
+
+  .match-back {
+    transition:
+      transform 0.45s cubic-bezier(0.3, 1.4, 0.5, 1),
+      opacity 0.4s;
+  }
+
+  .match-gone {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .match-stick {
+    position: absolute;
+    top: 14px;
+    left: 5px;
+    width: 6px;
+    height: 86px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #f0cf9c, #c4935a);
+  }
+
+  .match-head {
+    position: absolute;
+    top: 2px;
+    left: 1px;
+    width: 14px;
+    height: 18px;
+    border-radius: 50% 50% 45% 45%;
+    background: radial-gradient(circle at 40% 35%, #ff7a5c, #9e1420);
+  }
+
+  .match-flame {
+    position: absolute;
+    top: -26px;
+    left: -4px;
+    width: 22px;
+    height: 32px;
+  }
+
+  /* The flame that travels to the recipient */
+  .flying-flame {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 7;
+    width: 24px;
+    height: 44px;
+    pointer-events: none;
+  }
+
+  .flying-flame::after {
+    content: '';
+    position: absolute;
+    top: -18px;
+    left: -30px;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 190, 90, 0.6), transparent 65%);
+  }
+
+  /* Message card reveal, one line at a time */
+  .reveal > * {
+    animation: rise 0.8s both;
+  }
+
+  .reveal > *:nth-child(2) {
+    animation-delay: 0.5s;
+  }
+
+  .reveal > *:nth-child(3) {
+    animation-delay: 1.1s;
+  }
+
+  .reveal > *:nth-child(4) {
+    animation-delay: 1.7s;
+  }
+
+  .reveal > *:nth-child(n + 5) {
+    animation-delay: 2.1s;
+  }
+
+  .message-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 6.4vw, 2.1rem);
+    line-height: 1.2;
+    color: var(--color-glow);
+    text-wrap: balance;
+  }
+
+  /* Chain garland */
+  .chain-person {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    min-width: 58px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .mini-diya {
+    position: relative;
+    width: 28px;
+    height: 13px;
+    margin-top: 18px;
+    border-radius: 2px 2px 14px 14px;
+    background: linear-gradient(#e0703a, #7a2810);
+  }
+
+  .mini-diya::before {
+    content: '';
+    position: absolute;
+    top: -17px;
+    left: 9px;
+    width: 10px;
+    height: 18px;
+    border-radius: 50% 50% 50% 50% / 64% 64% 36% 36%;
+    background: radial-gradient(
+      ellipse 50% 58% at 50% 74%,
+      #fffdf0 0 16%,
+      #ffe48e 34%,
+      #ffb02e 58%,
+      rgba(255, 84, 20, 0) 80%
+    );
+    transform: scale(0);
+    transform-origin: 50% 100%;
+    transition: transform 0.6s cubic-bezier(0.2, 1.5, 0.4, 1);
+  }
+
+  .mini-diya-lit::before {
+    transform: scale(1);
+  }
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    transform: scale(1, 1) skewX(0);
+  }
+  25% {
+    transform: scale(0.93, 1.07) skewX(2deg);
+  }
+  50% {
+    transform: scale(1.04, 0.95) skewX(-1.5deg);
+  }
+  75% {
+    transform: scale(0.97, 1.04) skewX(1deg);
+  }
+}
+
+@keyframes breathe {
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes pulse {
+  50% {
+    transform: scale(1.28);
+    opacity: 0.35;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
