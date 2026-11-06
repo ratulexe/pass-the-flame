@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Diya from '../components/Diya';
 import DiyaRow from '../components/DiyaRow';
+import GreetingSteps from '../components/GreetingSteps';
 import Matchstick from '../components/Matchstick';
 import MessageCard from '../components/MessageCard';
 import RangoliCanvas from '../components/RangoliCanvas';
@@ -10,17 +11,24 @@ import SharePanel from '../components/SharePanel';
 import { useCelebration } from '../hooks/useCelebration';
 import { useGreetingCreation } from '../hooks/useGreetingCreation';
 import { sound } from '../lib/audio';
-import { draftGreeting } from '../lib/greetings';
+import { draftGreeting, GREETING_STEPS as STEPS } from '../lib/greetings';
 import { hasProfanity } from '../lib/profanity';
-import { cleanName, firstName, MAX_NAME_LENGTH } from '../lib/sanitize';
-import { LANGUAGES, RELATIONS, skyText } from '../lib/wishes';
+import { cleanName, firstName } from '../lib/sanitize';
+import { skyText } from '../lib/wishes';
 
 const DEFAULT_RANGOLI_NAME = 'Diwali';
 const PREVIEW_DEBOUNCE_MS = 200;
 const TYPING_BLOOM_MS = 1000;
 const INTRO_BLOOM_MS = 1400;
 const LIT_BLOOM_MS = 2600;
-const DEFAULT_HINT = 'Drag the matchstick to the wick to light your diya.';
+const BLOCKED_NAME = "That name can't be used here. Please try another.";
+
+/** Why a name can't be used, or null if it can. */
+function nameProblem(value, emptyMessage) {
+  const name = cleanName(value);
+  if (!name) return emptyMessage;
+  return hasProfanity(name) ? BLOCKED_NAME : null;
+}
 
 export default function CreatePage() {
   const { state: passed } = useLocation();
@@ -32,28 +40,23 @@ export default function CreatePage() {
   const [rangoliName, setRangoliName] = useState(DEFAULT_RANGOLI_NAME);
   const [bloomMs, setBloomMs] = useState(INTRO_BLOOM_MS);
   const [bloomKey, setBloomKey] = useState(0);
-  const [hint, setHint] = useState({ text: DEFAULT_HINT, error: false });
+  const [step, setStep] = useState(passed ? 'to' : 'hero');
+  const [stepError, setStepError] = useState(null);
   const [previewing, setPreviewing] = useState(false);
-  const [resetCount, setResetCount] = useState(0);
 
   const stageRef = useRef(null);
   const anchorRef = useRef(null);
   const resultRef = useRef(null);
-  const fromRef = useRef(null);
-  const toRef = useRef(null);
   const { celebrate, frameStage } = useCelebration({ tapForFireworks: !previewing });
   const creation = useGreetingCreation();
   const greeting = creation.draft;
   const lit = Boolean(greeting);
   const chainRoot = parent ? (parent.chain[0] ?? parent.from) : null;
-
-  useEffect(() => {
-    if (passed || resetCount) toRef.current.focus();
-  }, [passed, resetCount]);
+  const asking = !lit && STEPS.includes(step);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [previewing]);
+  }, [previewing, step]);
 
   useEffect(() => {
     const next = to.trim() || DEFAULT_RANGOLI_NAME;
@@ -65,20 +68,33 @@ export default function CreatePage() {
     return () => clearTimeout(timer);
   }, [to, lit, rangoliName]);
 
+  const toProblem = () => nameProblem(to, 'Who is this diya for? Add their name first.');
+  const fromProblem = () => nameProblem(from, 'Add your name, so they know who it is from.');
+
+  const goTo = (next, error = null) => {
+    setStepError(error);
+    setStep(next);
+  };
+
+  const nextStep = () => {
+    const problem = (step === 'to' && toProblem()) || (step === 'from' && fromProblem());
+    if (problem) {
+      setStepError(problem);
+      return;
+    }
+    const after = STEPS[STEPS.indexOf(step) + 1] ?? 'light';
+    goTo(after);
+  };
+
   const light = () => {
     if (lit) return true;
+    const problem = toProblem() ?? fromProblem();
+    if (problem) {
+      goTo(toProblem() ? 'to' : 'from', problem);
+      return false;
+    }
     const cleanFrom = cleanName(from);
     const cleanTo = cleanName(to);
-    if (!cleanFrom || !cleanTo) {
-      setHint({ text: 'Add your name and theirs first, then light the diya.', error: true });
-      (cleanFrom ? toRef : fromRef).current.focus();
-      return false;
-    }
-    if (hasProfanity(cleanFrom) || hasProfanity(cleanTo)) {
-      setHint({ text: "That name can't be used here. Please try another.", error: true });
-      (hasProfanity(cleanFrom) ? fromRef : toRef).current.focus();
-      return false;
-    }
     sound.unlock();
     sound.ambient();
     sound.ignite();
@@ -97,11 +113,15 @@ export default function CreatePage() {
     setTo('');
     setRelation('friend');
     creation.reset();
-    setHint({ text: DEFAULT_HINT, error: false });
+    goTo('to');
     setRangoliName(DEFAULT_RANGOLI_NAME);
     setBloomMs(INTRO_BLOOM_MS);
-    setResetCount((count) => count + 1);
     window.scrollTo(0, 0);
+  };
+
+  const setField = (field, value) => {
+    setStepError(null);
+    ({ to: setTo, from: setFrom, relation: setRelation, lang: setLang })[field](value);
   };
 
   return (
@@ -109,96 +129,76 @@ export default function CreatePage() {
       {previewing && <ReceiveFlow greeting={greeting} onBack={() => setPreviewing(false)} />}
 
       <section className="flex flex-col gap-[22px]" aria-label="Light a diya" hidden={previewing}>
-        <div className="dimmable flex flex-col gap-2">
-          {chainRoot && (
-            <p className="font-semibold text-flame">
-              You&apos;re passing on a flame that began with {chainRoot}.
-            </p>
-          )}
-          <h1>Light a diya for someone you love.</h1>
-          <p className="text-[1.05rem] text-muted">
-            They light the next one, and your flame keeps travelling from home to home.
+        {chainRoot && !lit && (
+          <p className="dimmable font-semibold text-flame">
+            You&apos;re passing on a flame that began with {chainRoot}.
           </p>
-        </div>
+        )}
 
-        <form
-          className="card dimmable"
-          autoComplete="off"
-          onSubmit={(event) => event.preventDefault()}
-        >
-          <div className="grid grid-cols-1 gap-3 min-[361px]:grid-cols-2">
-            <label className="field">
-              Your name
-              <input
-                ref={fromRef}
-                value={from}
-                maxLength={MAX_NAME_LENGTH}
-                placeholder="Aarav"
-                required
-                disabled={lit}
-                onChange={(event) => setFrom(event.target.value)}
-              />
-            </label>
-            <label className="field">
-              Their name
-              <input
-                ref={toRef}
-                value={to}
-                maxLength={MAX_NAME_LENGTH}
-                placeholder="Meera"
-                required
-                disabled={lit}
-                onChange={(event) => setTo(event.target.value)}
-              />
-            </label>
-            <label className="field">
-              They are your
-              <select
-                value={relation}
-                disabled={lit}
-                onChange={(event) => setRelation(event.target.value)}
-              >
-                {RELATIONS.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              Wish them in
-              <select value={lang} disabled={lit} onChange={(event) => setLang(event.target.value)}>
-                {LANGUAGES.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
+        {step === 'hero' && (
+          <div className="flex flex-col gap-2 text-center">
+            <h1>Light a diya for someone you love.</h1>
+            <p className="text-[1.05rem] text-muted">
+              They light the next one, and your flame keeps travelling from home to home.
+            </p>
           </div>
-        </form>
+        )}
 
-        <div ref={stageRef} className={`stage ${lit ? 'lit' : ''}`}>
+        {step === 'light' && !lit && (
+          <div className="flex flex-col gap-2 text-center">
+            <h1>Now light it for {firstName(to)}.</h1>
+          </div>
+        )}
+
+        <div ref={stageRef} className={`stage ${lit ? 'lit' : ''} ${asking ? 'stage-small' : ''}`}>
           <RangoliCanvas name={rangoliName} duration={bloomMs} bloomKey={bloomKey} />
-          <Diya anchorRef={anchorRef} showTarget={!lit} />
-          <Matchstick targetRef={anchorRef} onLight={light} gone={lit} />
+          <Diya anchorRef={anchorRef} showTarget={step === 'light' && !lit} />
+          {step === 'light' && <Matchstick targetRef={anchorRef} onLight={light} gone={lit} />}
         </div>
 
-        <p className="dimmable -mt-1.5 text-center text-[0.9rem] text-balance text-muted">
-          {to.trim()
-            ? `This rangoli grows from the letters of ${to.trim()}'s name. Every name gets its own pattern.`
-            : 'Type their name to grow a rangoli from it.'}
-        </p>
+        {step === 'hero' && (
+          <button
+            type="button"
+            className="btn btn-primary btn-big"
+            onClick={() => {
+              sound.unlock();
+              goTo('to');
+            }}
+          >
+            Light a diya for someone
+          </button>
+        )}
 
-        {!lit && (
-          <p className="dimmable text-center text-[0.98rem] text-balance">
-            <span className={hint.error ? 'text-[#ff9fb0]' : ''} role={hint.error ? 'alert' : null}>
-              {hint.text}
-            </span>{' '}
-            <button type="button" className="link-btn" onClick={light}>
+        {asking && (
+          <>
+            {step === 'to' && (
+              <p className="dimmable -mt-1.5 text-center text-[0.9rem] text-balance text-muted">
+                {to.trim()
+                  ? `This rangoli is growing from the letters of ${to.trim()}'s name.`
+                  : 'Type their name, and a rangoli grows from it.'}
+              </p>
+            )}
+            <GreetingSteps
+              step={step}
+              values={{ to, relation, from, lang }}
+              onChange={setField}
+              error={stepError}
+              onNext={nextStep}
+              onBack={() => goTo(STEPS[STEPS.indexOf(step) - 1])}
+            />
+          </>
+        )}
+
+        {step === 'light' && !lit && (
+          <div className="dimmable flex flex-col items-center gap-1 text-center text-[0.98rem] text-balance">
+            <p>Drag the matchstick to the wick to light your diya.</p>
+            <button type="button" className="link-btn self-center" onClick={light}>
               Or tap here to light it
             </button>
-          </p>
+            <button type="button" className="link-btn self-center" onClick={() => goTo('from')}>
+              Back
+            </button>
+          </div>
         )}
 
         {lit && (

@@ -32,8 +32,11 @@ export default function MessageCard({ greeting }) {
   };
 
   return (
-    <div className="card reveal" lang={greeting.lang}>
-      <h2 className="message-title">{title}</h2>
+    <div className="card wish-card reveal" lang={greeting.lang}>
+      <span className="wish-flame self-center" aria-hidden="true">
+        <span className="flame-core" />
+      </span>
+      <h2 className="message-title text-center">{title}</h2>
       <p className="font-semibold text-flame">{relationLine}</p>
       {ready ? (
         <p className={`text-[1.14rem] leading-[1.6] ${wishArrivesLate ? 'wish-late' : ''}`}>

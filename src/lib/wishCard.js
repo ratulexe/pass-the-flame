@@ -14,7 +14,11 @@ const FILE_NAME = 'pass-the-flame-diwali.jpg';
 const RANGOLI_SIZE = 700;
 const CENTER_Y = 530;
 const WISH_TOP = 930;
-const WISH_BOTTOM = 1210;
+const WISH_BOTTOM = 1190;
+const FRAME_INSET = 30;
+const BEAD_GAP = 26;
+const BEAD_COLORS = ['#ff7f11', '#ffc53a'];
+const TITLE_SIZE = 72;
 
 function loadFonts(text) {
   const fonts = ['"Yatra One"', '"Tiro Bangla"', 'Mukta', '"Hind Siliguri"'];
@@ -36,6 +40,27 @@ function paintSky(ctx) {
     ctx.beginPath();
     ctx.arc(random() * WIDTH, random() * HEIGHT, Math.pow(random(), 3) * 2.6 + 0.6, 0, TAU);
     ctx.fill();
+  }
+}
+
+/** A marigold border around the whole card. */
+function paintBeadFrame(ctx) {
+  const right = WIDTH - FRAME_INSET;
+  const bottom = HEIGHT - FRAME_INSET;
+  const bead = (x, y, index) => {
+    ctx.fillStyle = BEAD_COLORS[index % BEAD_COLORS.length];
+    ctx.beginPath();
+    ctx.arc(x, y, 9, 0, TAU);
+    ctx.fill();
+  };
+  let index = 0;
+  for (let x = FRAME_INSET; x <= right; x += BEAD_GAP, index++) {
+    bead(x, FRAME_INSET, index);
+    bead(x, bottom, index);
+  }
+  for (let y = FRAME_INSET + BEAD_GAP; y < bottom; y += BEAD_GAP, index++) {
+    bead(FRAME_INSET, y, index);
+    bead(right, y, index);
   }
 }
 
@@ -149,6 +174,7 @@ async function drawCard(greeting) {
   canvas.height = HEIGHT;
   const ctx = canvas.getContext('2d');
   paintSky(ctx);
+  paintBeadFrame(ctx);
 
   ctx.save();
   ctx.translate((WIDTH - RANGOLI_SIZE) / 2, CENTER_Y - RANGOLI_SIZE / 2);
@@ -162,12 +188,12 @@ async function drawCard(greeting) {
   ctx.fillStyle = '#ffe6ae';
   ctx.shadowColor = 'rgba(255,160,50,.6)';
   ctx.shadowBlur = 30;
-  ctx.font = `64px ${DISPLAY_FONT}`;
+  ctx.font = `${TITLE_SIZE}px ${DISPLAY_FONT}`;
   const titleWidth = ctx.measureText(title).width;
   if (titleWidth > TEXT_WIDTH) {
-    ctx.font = `${Math.floor((64 * TEXT_WIDTH) / titleWidth)}px ${DISPLAY_FONT}`;
+    ctx.font = `${Math.floor((TITLE_SIZE * TEXT_WIDTH) / titleWidth)}px ${DISPLAY_FONT}`;
   }
-  ctx.fillText(title, WIDTH / 2, 130);
+  ctx.fillText(title, WIDTH / 2, 140);
   ctx.shadowBlur = 0;
 
   const { lines, lineHeight } = fitWish(ctx, greeting.message);
@@ -178,10 +204,10 @@ async function drawCard(greeting) {
 
   ctx.fillStyle = '#c3b2cf';
   ctx.font = `36px ${BODY_FONT}`;
-  ctx.fillText(sign, WIDTH / 2, 1262);
+  ctx.fillText(sign, WIDTH / 2, 1242);
   ctx.fillStyle = '#ffb238';
   ctx.font = `30px ${DISPLAY_FONT}`;
-  ctx.fillText('Pass the Flame', WIDTH / 2, 1316);
+  ctx.fillText('Pass the Flame', WIDTH / 2, 1292);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(

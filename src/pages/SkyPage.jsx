@@ -35,7 +35,7 @@ export default function SkyPage() {
         <h1>The Deepmala sky</h1>
         <p className="text-[1.05rem] text-muted">
           Every glowing diya is a flame someone lit for someone they love. Watch new ones appear
-          live.
+          live, and tap one to hear it sing.
         </p>
       </div>
 

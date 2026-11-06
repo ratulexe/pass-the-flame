@@ -19,6 +19,7 @@ export default function App() {
     <>
       <DiyaGradients />
       <StarrySky />
+      <div className="page-glow" aria-hidden="true" />
       <SkyLife />
       <Toran />
       <FireworksCanvas />

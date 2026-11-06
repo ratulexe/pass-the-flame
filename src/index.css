@@ -446,8 +446,37 @@
     height: 26px;
   }
 
-  .reveal > .wish-late {
+  .reveal > .wish-late.wish-late {
     animation-delay: 0s;
+  }
+
+  /* A marigold strand along the top and bottom of the wish */
+  .wish-card {
+    position: relative;
+    padding-block: 30px;
+    overflow: hidden;
+    border-color: rgba(255, 197, 58, 0.5);
+  }
+
+  .wish-card::before,
+  .wish-card::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    left: 0;
+    height: 10px;
+    background:
+      radial-gradient(circle at 5px 5px, #ff7f11 4px, transparent 4.5px),
+      radial-gradient(circle at 15px 5px, #ffc53a 4px, transparent 4.5px);
+    background-size: 20px 10px;
+  }
+
+  .wish-card::before {
+    top: 8px;
+  }
+
+  .wish-card::after {
+    bottom: 8px;
   }
 
   /* Google allows hiding this badge when the footer names reCAPTCHA as plain text */
@@ -551,7 +580,115 @@
     background: radial-gradient(circle at 50% 50%, rgba(255, 178, 56, 0.26), transparent 70%);
   }
 
-  /* Chain garland */
+  /* Warm light that spreads across the page when a diya on screen is lit */
+  .page-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100vh;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        circle at 50% 42%,
+        rgba(255, 176, 80, 0.42),
+        rgba(255, 110, 40, 0.16) 42%,
+        transparent 74%
+      ),
+      linear-gradient(rgba(120, 50, 10, 0.1), rgba(150, 60, 10, 0.26));
+    opacity: 0;
+    will-change: opacity;
+  }
+
+  body:has(section:not([hidden]) .stage.lit) .page-glow {
+    animation: glow-spread 3s ease-out forwards;
+  }
+
+  /* While a question is being asked, the stage makes room for the card and keyboard */
+  .stage-small {
+    width: min(62%, 220px);
+  }
+
+  .choice {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 8px 14px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    background: rgba(8, 4, 16, 0.6);
+    border: 1px solid rgba(255, 196, 120, 0.3);
+    border-radius: 999px;
+  }
+
+  .choice:has(:checked) {
+    font-weight: 600;
+    color: #2a1206;
+    background: linear-gradient(180deg, #ffc960, var(--color-marigold));
+    border-color: transparent;
+  }
+
+  .choice:has(:focus-visible) {
+    outline: 2px solid var(--color-flame);
+    outline-offset: 2px;
+  }
+
+  .step-dots {
+    display: inline-flex;
+    gap: 5px;
+  }
+
+  .step-dots > span {
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 196, 120, 0.25);
+    border-radius: 50%;
+  }
+
+  .step-dots > .step-dot-done {
+    background: var(--color-flame);
+    box-shadow: 0 0 8px var(--color-flame);
+  }
+
+  /* Chain garland: a marigold strand with a diya hanging for each person */
+  .garland {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .garland > .chain-person {
+    position: relative;
+    flex: 1 1 72px;
+    max-width: 50%;
+    padding-top: 10px;
+    overflow-wrap: anywhere;
+  }
+
+  .garland > .chain-person::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 10px;
+    background:
+      radial-gradient(circle at 5px 5px, #ff7f11 4px, transparent 4.5px),
+      radial-gradient(circle at 15px 5px, #ffc53a 4px, transparent 4.5px);
+    background-size: 20px 10px;
+  }
+
+  .garland > .chain-person::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 1px;
+    height: 12px;
+    background: rgba(255, 214, 150, 0.6);
+  }
+
   .chain-person {
     display: flex;
     flex-direction: column;
@@ -589,11 +726,12 @@
     );
     transform: scale(0);
     transform-origin: 50% 100%;
-    transition: transform 0.6s cubic-bezier(0.2, 1.5, 0.4, 1);
   }
 
   .mini-diya-lit::before {
     transform: scale(1);
+    animation: flame-catch 0.6s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+    animation-delay: calc(var(--turn, 0) * 0.3s);
   }
 }
 
@@ -623,6 +761,24 @@
   50% {
     transform: scale(1.28);
     opacity: 0.35;
+  }
+}
+
+@keyframes glow-spread {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes flame-catch {
+  from {
+    transform: scale(0);
   }
 }
 
@@ -674,6 +830,7 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }

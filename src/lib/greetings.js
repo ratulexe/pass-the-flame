@@ -1,5 +1,8 @@
 import { loadFirestore } from './firebase';
 
+/** The questions asked before lighting, in order. */
+export const GREETING_STEPS = ['to', 'relation', 'from'];
+
 const MAX_CHAIN = 8;
 const ID_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';
 const SAVE_ATTEMPTS = 2;

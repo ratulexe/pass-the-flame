@@ -15,7 +15,10 @@ function visiblePeople({ chain, from, to, depth }) {
   return [people[0], { key: 'gap', name: `+${total - 5} more` }, ...people.slice(-4)];
 }
 
-/** The chain of diyas this flame has passed through. `lit` lights the recipient's diya. */
+/**
+ * The chain as a marigold garland, whose diyas light one after another. The recipient's diya
+ * waits for `lit`, then lights without delay, as the flame arrives.
+ */
 export default function ChainGarland({ greeting, lit, preview }) {
   const homes = greeting.depth + 1;
   const people = visiblePeople(greeting);
@@ -31,18 +34,15 @@ export default function ChainGarland({ greeting, lit, preview }) {
           ? `This flame comes straight from ${greeting.from}'s diya.`
           : `This flame has passed through ${homes} homes to reach you.`}
       </p>
-      <ol className="flex flex-wrap items-end gap-x-1 gap-y-2">
+      <ol className="garland">
         {people.map((person, index) => (
-          <li key={person.key} className="flex items-end gap-1">
-            {index > 0 && (
-              <span className="pb-[26px] text-flame opacity-70" aria-hidden="true">
-                →
-              </span>
-            )}
-            <span className={`chain-person ${person.isRecipient ? 'text-flame' : ''}`}>
-              <span className={`mini-diya ${!person.isRecipient || lit ? 'mini-diya-lit' : ''}`} />
-              {person.isRecipient ? recipientLabel(person.name) : person.name}
-            </span>
+          <li
+            key={person.key}
+            className={`chain-person ${person.isRecipient ? 'text-flame' : ''}`}
+            style={{ '--turn': person.isRecipient ? 0 : index }}
+          >
+            <span className={`mini-diya ${!person.isRecipient || lit ? 'mini-diya-lit' : ''}`} />
+            {person.isRecipient ? recipientLabel(person.name) : person.name}
           </li>
         ))}
       </ol>

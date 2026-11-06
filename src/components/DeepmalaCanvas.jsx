@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { sound } from '../lib/audio';
 import { createDeepmala } from '../lib/deepmala';
 import { showToast } from '../lib/toast';
 
@@ -13,7 +14,14 @@ export default function DeepmalaCanvas({ diyas }) {
     deepmala.start();
     const observer = new ResizeObserver(() => deepmala.resize());
     observer.observe(canvas);
+    const onPointerDown = (event) => {
+      if (event.target.closest('a,button,input,.card')) return;
+      sound.unlock();
+      deepmala.tapAt(event.clientX, event.clientY);
+    };
+    window.addEventListener('pointerdown', onPointerDown);
     return () => {
+      window.removeEventListener('pointerdown', onPointerDown);
       observer.disconnect();
       deepmala.stop();
     };
