@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import DiyaGradients from './components/DiyaGradients';
+import ErrorBoundary from './components/ErrorBoundary';
 import FireworksCanvas from './components/FireworksCanvas';
 import Footer from './components/Footer';
 import SkyLife from './components/SkyLife';
@@ -29,14 +30,16 @@ export default function App() {
           <SoundToggle />
         </header>
         <main>
-          <Suspense fallback={null}>
-            <Routes>
-              <Route path="/" element={<CreatePage />} />
-              <Route path="/g/:id" element={<ReceivePage />} />
-              <Route path="/sky" element={<SkyPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={null}>
+              <Routes>
+                <Route path="/" element={<CreatePage />} />
+                <Route path="/g/:id" element={<ReceivePage />} />
+                <Route path="/sky" element={<SkyPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </main>
         <Footer />
       </div>

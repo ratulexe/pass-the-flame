@@ -5,7 +5,7 @@ import { elderTitle, fallbackWish, isElder, LANGUAGE_NAMES, relationLabel } from
 // Timed on the live site: usually about 2s, with some replies far slower, which the timeout covers.
 // gemini-3.8-flash took over 30s.
 const MODEL = 'gemini-3.5-flash-lite';
-const TIMEOUT_MS = 6000;
+const TIMEOUT_MS = 10000;
 const SECOND_ATTEMPT_MS = 2500;
 const MAX_WISH_LENGTH = 400;
 const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;

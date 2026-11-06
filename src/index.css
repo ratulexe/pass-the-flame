@@ -96,6 +96,14 @@
     backdrop-filter: blur(8px);
   }
 
+  /* Blurring behind moving canvases is costly on mid-range phones */
+  @media (max-width: 520px) {
+    .card {
+      background: rgba(30, 16, 44, 0.92);
+      backdrop-filter: none;
+    }
+  }
+
   .card-title {
     margin: 0;
     font-family: var(--font-display);
