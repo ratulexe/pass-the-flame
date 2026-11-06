@@ -14,7 +14,7 @@ A Diwali greeting that keeps travelling. Light a diya for someone you love. They
 - **Receive the flame:** the sender's flame flies in, then fireworks spell the recipient's name in sparks.
 - **A rangoli from your name:** the same name always grows the same pattern.
 - **Fresh wishes:** Gemini writes each wish in English, Hindi or Bengali. If it fails or takes over 10 seconds, a handwritten wish takes over, so the app never breaks.
-- **Respect for elders:** Maa, Papa, elder siblings, teachers and elder relatives are never shown by name.
+- **Respect for elders:** parents, grandparents, elder siblings, teachers and other elders are never shown by name.
 - **Pass the flame:** each greeting remembers its chain, such as A → B → C.
 - **Deepmala sky:** a live night sky of the latest diyas, with a total counter and flames passed.
 - **Sharing:** a direct WhatsApp button, the native share sheet, copy link, and a wish card image for WhatsApp Status.

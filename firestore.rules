@@ -13,9 +13,9 @@ service cloud.firestore {
                                'chain', 'depth', 'createdAt'])
         && isName(data.from)
         && isName(data.to)
-        && data.relation in ['maa', 'papa', 'dadaji', 'dadi', 'nanaji', 'nani', 'bhaiya', 'didi',
-                             'chacha', 'chachi', 'mama', 'mausi', 'bua', 'jiju', 'bhabhi',
-                             'father_in_law', 'mother_in_law', 'elder', 'son', 'daughter',
+        && data.relation in ['maa', 'papa', 'grandfather', 'grandmother', 'bhaiya', 'didi', 'uncle',
+                             'aunt', 'brother_in_law', 'sister_in_law', 'father_in_law',
+                             'mother_in_law', 'elder', 'son', 'daughter',
                              'husband', 'wife', 'partner', 'sibling', 'cousin', 'nephew', 'niece',
                              'grandchild', 'bestie', 'friend', 'teacher', 'senior', 'colleague',
                              'neighbour', 'student']
