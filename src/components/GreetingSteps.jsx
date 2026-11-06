@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { GREETING_STEPS as STEPS } from '../lib/greetings';
 import { MAX_NAME_LENGTH } from '../lib/sanitize';
-import { isElder, LANGUAGES, RELATIONS } from '../lib/wishes';
+import { isElder, LANGUAGES, RELATION_GROUPS } from '../lib/wishes';
 
 function Choices({ legend, name, options, value, onChange }) {
   return (
@@ -70,13 +70,16 @@ export default function GreetingSteps({ step, values, onChange, error, onNext, o
       {step === 'relation' && (
         <>
           <h2 className="card-title">What are they to you?</h2>
-          <Choices
-            legend="They are your"
-            name="relation"
-            options={RELATIONS}
-            value={values.relation}
-            onChange={(value) => onChange('relation', value)}
-          />
+          {RELATION_GROUPS.map((group) => (
+            <Choices
+              key={group.label}
+              legend={group.label}
+              name="relation"
+              options={group.options}
+              value={values.relation}
+              onChange={(value) => onChange('relation', value)}
+            />
+          ))}
           {isElder(values.relation) && (
             <p className="text-[0.9rem] text-muted">
               Out of respect, they will be greeted without their name.

@@ -13,8 +13,12 @@ service cloud.firestore {
                                'chain', 'depth', 'createdAt'])
         && isName(data.from)
         && isName(data.to)
-        && data.relation in ['maa', 'papa', 'bestie', 'sibling', 'partner', 'teacher', 'elder',
-                             'bhaiya', 'didi', 'friend']
+        && data.relation in ['maa', 'papa', 'dadaji', 'dadi', 'nanaji', 'nani', 'bhaiya', 'didi',
+                             'chacha', 'chachi', 'mama', 'mausi', 'bua', 'jiju', 'bhabhi',
+                             'father_in_law', 'mother_in_law', 'elder', 'son', 'daughter',
+                             'husband', 'wife', 'partner', 'sibling', 'cousin', 'nephew', 'niece',
+                             'grandchild', 'bestie', 'friend', 'teacher', 'senior', 'colleague',
+                             'neighbour', 'student']
         && data.lang in ['en', 'hi', 'bn']
         && data.message is string && data.message.size() >= 1 && data.message.size() <= 400
         && data.rootId is string
